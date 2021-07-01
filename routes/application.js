@@ -22,10 +22,10 @@ router.post('/:username/:usernameFollowing/seguir', isAuth, userController.postF
 router.delete('/:username/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow);
 
     // -> Buscar seguidores do usuário
-router.get('/seguidores/:username', isAuth, userController.getFollowers);
+router.get('/seguidores/:username', userController.getFollowers);
 
     // -> Seguir quem o usuário segue
-router.get('/seguindo/:username', isAuth, userController.getFollowing);  
+router.get('/seguindo/:username', userController.getFollowing);  
 
     // -> Buscar informações gerais do usuário, repositórios e seguidores
 router.get('/:username', isAuth, userController.getIndex);
