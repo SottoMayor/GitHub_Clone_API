@@ -6,6 +6,8 @@ const { validationResult } = require('express-validator');
 
 const { Op } = require('sequelize');
 
+const bcrypt = require('bcryptjs');
+
 // Parte de Autenticação
 
 // Importando tabelas do banco de dados
@@ -78,6 +80,8 @@ exports.postSignin = (req, res, next) => {
     // Extraindo username da URL
     const username = req.body.username;
 
+    let userData;
+
     // Validação de dados <-> Rotas Auth
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -98,9 +102,22 @@ exports.postSignin = (req, res, next) => {
                 throw error;
             }
 
+            userData = user;
+
+            return Tokens.findOne({ where: { userId: userData.dataValues.id } })
+        })
+        .then(tokenExists => {
+
+            // Não é um erro de fato, apenas uma indicação!
+            if(tokenExists){
+                const error = new Error('Usuário já autenticado!');
+                error.statusCode = 200;
+                throw error;
+            }
+
             // Guardando dados para criar o token
             const date = new Date(Date.now()).toISOString();
-            const userId = user.dataValues.id;
+            const userId = userData.dataValues.id;
             const token = userId.toString() + '_' + date;
 
             // Criando token
@@ -109,13 +126,17 @@ exports.postSignin = (req, res, next) => {
                 dateRequest: date,
                 token: token,
             }).then((token) => {
+                // Criptografar token!
+                return bcrypt.hash(token.dataValues.token, 12);
+            })
+            .then(criptToken => {
                 // Mandando resposta para o FrontEnd
                 res.status(200).json({
                     message: 'Usuário encontrado com sucesso!',
-                    userData: user.dataValues,
-                    token: token.dataValues.token,
+                    userData: userData.dataValues,
+                    token: criptToken
                 });
-            });
+            })
         })
         .catch((err) => {
             // Capturando possíveis erros
