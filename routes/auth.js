@@ -10,6 +10,9 @@ const { body } = require('express-validator');
 // Importando funções que fazem a lógica de negócio, em controllers
 const userController = require('../controllers/user');
 
+// Importando middleware para proteção de rotas
+const isAuth = require('../middleware/is-auth');
+
 // -> Cadastrar novo usuário
 router.put(
     '/cadastrar',
@@ -47,7 +50,7 @@ router.post('/entrar', [
 ], userController.postSignin);
 
 // -> Fazer desconectar (logout)
-router.delete('/:username/sair', userController.deleteSignout);
+router.delete('/:username/sair', isAuth, userController.deleteSignout);
 
 
 module.exports = router;

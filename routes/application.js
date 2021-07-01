@@ -16,16 +16,16 @@ const isAuth = require('../middleware/is-auth');
 
 // Rotas para interação com usuário
     // -> Seguir usuário
-router.post('/:username/:usernameFollowing/seguir', userController.postFollow);
+router.post('/:username/:usernameFollowing/seguir', isAuth, userController.postFollow);
 
     // -> Deixar de seguir usuário
-router.delete('/:username/:usernameFollowing/deixar-de-seguir', userController.deleteFollow);
+router.delete('/:username/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow);
 
     // -> Buscar seguidores do usuário
-router.get('/seguidores/:username', userController.getFollowers);
+router.get('/seguidores/:username', isAuth, userController.getFollowers);
 
     // -> Seguir quem o usuário segue
-router.get('/seguindo/:username', userController.getFollowing);  
+router.get('/seguindo/:username', isAuth, userController.getFollowing);  
 
     // -> Buscar informações gerais do usuário, repositórios e seguidores
 router.get('/:username', isAuth, userController.getIndex);
@@ -33,7 +33,7 @@ router.get('/:username', isAuth, userController.getIndex);
 // Rotas para interação com repositório
     // -> Criar repositório para um usuário
 router.put(
-    '/novo-repositorio/:username',
+    '/novo-repositorio/:username', isAuth,
     [
         body(
             'name',
@@ -54,10 +54,10 @@ router.put(
 router.get('/repositorios/:username', repositoryController.getRepositories);
 
     // -> Dar estrela a um repositório
-router.post('/:username/:repositoryId/dar-estrela', repositoryController.postStar);
+router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController.postStar);
 
     // -> Retirar estrela de um repositório
-router.delete('/:username/:repositoryId/retirar-estrela', repositoryController.deleteStar);
+router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar);
 
     // -> Mostrar repositório que o usuário deu estrela
 router.get('/repositorios-com-estrela/:username', repositoryController.getRepositoriesStars);
