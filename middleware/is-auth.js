@@ -9,34 +9,59 @@ const bcrypt = require('bcryptjs');
 module.exports = (req, res, next) => {
     // Capturando header Authorization da solicitação de entrada
     const authHeader = req.get('Authorization');
+    console.log(authHeader);
     // Verificando se o header Auth está setado
     if(!authHeader){
         const error = new Error('Usuário não autenticado!');
         error.statusCode = 401;
         throw error;
     }
+
+    // Extraindo token
+    const token = authHeader.split(' ')[1];
+
+    //Extraindo id do usuário
+    const userId = token.split('*')[0];
     
-    // Extraindo token do header Auth
-    const frontEndToken = authHeader.split(' ')[1];
-    const backEndToken = await Tokens.findOne({ where: { userId: req.userData.id } })
+    // Buscando token do banco de dados
+    Tokens.findOne({ where: { userId: userId } })
+    .then(tokenData => {
+        if(!tokenData){
+            const error = new Error('Usuário não autenticado!');
+            error.statusCode = 401;
+            throw error;
+        }
+        const frontEndToken = token.split('*')[1];
+        const backEndToken = tokenData.token;
 
-    let validToken;
+        let validToken;
 
-    // Verificando se o token extraido do FE bate com o token do BE
-    try{
-        validToken = bcrypt.compareSync(backEndToken, frontEndToken);
-    }
-    catch (err){
-        err.statusCode = 500;
-        throw err
-    }
-    if(!validToken){
-        const error = new Error("Usuário não autenticado!");
-        error.statusCode = 401;
-        throw error;
-    }
+        // Verificando se o token extraido do FE bate com o token do BE
+        try{
+            validToken = bcrypt.compareSync(backEndToken, frontEndToken);
+        }
+        catch (err){
+            err.statusCode = 500;
+            throw err
+        }
+        if(!validToken){
+            const error = new Error("Chave de acesso inválida, usuário não autenticado!");
+            error.statusCode = 401;
+            throw error;
+        }
 
-    // Se não der erro, deu tudo certo e o usuário foi autenticado!
-    next();
+        // Salvando UserId na request
+        req.userId = userId;
 
+        // Se não der erro, deu tudo certo e o usuário foi autenticado!
+        next();
+
+    })
+    .catch(err => {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+    
 }

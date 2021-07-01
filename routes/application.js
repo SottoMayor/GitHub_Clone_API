@@ -11,6 +11,9 @@ const { body } = require('express-validator');
 const userController = require('../controllers/user');
 const repositoryController = require('../controllers/repository');
 
+// Importando middleware para proteção de rotas
+const isAuth = require('../middleware/is-auth');
+
 // Rotas para interação com usuário
     // -> Seguir usuário
 router.post('/:username/:usernameFollowing/seguir', userController.postFollow);
@@ -25,7 +28,7 @@ router.get('/seguidores/:username', userController.getFollowers);
 router.get('/seguindo/:username', userController.getFollowing);  
 
     // -> Buscar informações gerais do usuário, repositórios e seguidores
-router.get('/:username', userController.getIndex);
+router.get('/:username', isAuth, userController.getIndex);
 
 // Rotas para interação com repositório
     // -> Criar repositório para um usuário

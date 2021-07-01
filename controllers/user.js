@@ -130,14 +130,11 @@ exports.postSignin = (req, res, next) => {
                 return bcrypt.hash(token.dataValues.token, 12);
             })
             .then(criptToken => {
-                // Armazenando dados do usuário na solicitação de entrada
-                req.userData = userData;
-
                 // Mandando resposta para o FrontEnd
                 res.status(200).json({
                     message: 'Usuário encontrado com sucesso!',
                     userData: userData.dataValues,
-                    token: criptToken
+                    token: userData.dataValues.id + '*' +criptToken
                 });
             })
         })
