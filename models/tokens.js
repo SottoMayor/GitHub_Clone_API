@@ -16,9 +16,7 @@ const Tokens = sequelize.define('token',{
         allowNull: false
     },
     dateRequest:{
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultVale: new Date(Date.now()).toISOString()
+        type: Sequelize.DATE
     },
     token:{
         type: Sequelize.STRING,

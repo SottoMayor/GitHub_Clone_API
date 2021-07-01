@@ -12,6 +12,44 @@ app.use((req, res, next) => {
     next();
 })
 
+// Verificando se o usuário ainda tá logado
+const Tokens = require('./models/tokens');
+app.use( (req, res, next) => {
+    const authHeader = req.get('Authorization');
+    if(!authHeader){
+        // Nenhum usuário autenticado
+        console.log('Nenhum usuário autenticado');
+        return next();
+    }
+    // Extraindo token
+    const token = authHeader.split(' ')[1];
+    // Extraindo userId do token
+    const userId = token.split('*')[0];
+
+    Tokens.findOne({ where: {userId: userId} })
+    .then( tokenData => {
+        if(!tokenData){
+            const error = new Error('chave de acesso inválida, usuário não autenticado!');
+            error.statusCode = 401;
+            next(error);
+        }
+        const tokenExpiration = tokenData.dateRequest;
+        if(Date.now() > tokenExpiration){
+            // token já expirou!
+            console.log('Nenhum usuário autenticado[token destruido]');
+            tokenData.destroy();
+        }
+        next();
+    })
+    .catch(err => {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+
+})
+
 // Setando Rotas
 const authRoutes = require('./routes/auth');
 app.use(authRoutes)
