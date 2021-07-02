@@ -150,52 +150,28 @@ exports.postSignin = (req, res, next) => {
 
 // Logout do usuário
 exports.deleteSignout = (req, res, next) => {
-    // Extraindo username da URL
-    const username = req.params.username;
-    console.log(username)
+    // Extraindo o ID do usuário da solicitação de entrada
+    const userId = req.userId
 
-    // Buscando usuário pelo username
-    User.findOne({ where: { username: username } })
-        .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'Usuário não encontrado! Tente novamente'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Guardando o ID do usuário
-            let userId = user.dataValues.id;
-
-            // Buscando Token de autenticação
-            return Tokens.findOne({ where: {userId: userId} })
+    // Buscando token de acesso pelo ID do usuário
+    Tokens.findOne({ where: {userId: userId} })
+    .then(token => {
+        return token.destroy()
+    })
+    .then( deletedToken => {
+        // Mandando resposta pro frontEnd
+        res.status(200).json({
+            message: `O usuário fez logout!`,
+            deletedToken: deletedToken
         })
-        .then(token => {
-            if(!token){
-                const error = new Error(
-                    'Token não encontrado! Tente novamente'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            return token.destroy()
-        })
-        .then( deletedToken => {
-            // Mandando resposta pro frontEnd
-            res.status(200).json({
-                message: `O usuário ${username} fez logout!`,
-                deletedToken: deletedToken
-            })
-        })
-        .catch((err) => {
-            // Capturando possíveis erros
-            if (!err.statusCode) {
-                err.statusCode = 500;
-            }
-            next(err);
-        });
+    })
+    .catch((err) => {
+        // Capturando possíveis erros
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
 }
 
 // Parte de Interação com Usuário

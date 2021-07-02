@@ -50,7 +50,7 @@ router.post('/entrar', [
 ], userController.postSignin);
 
 // -> Fazer desconectar (logout)
-router.delete('/:username/sair', isAuth, userController.deleteSignout);
+router.delete('/sair', isAuth, userController.deleteSignout);
 
 
 module.exports = router;

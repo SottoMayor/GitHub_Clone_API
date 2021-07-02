@@ -9,7 +9,6 @@ const bcrypt = require('bcryptjs');
 module.exports = (req, res, next) => {
     // Capturando header Authorization da solicitação de entrada
     const authHeader = req.get('Authorization');
-    console.log(authHeader);
     // Verificando se o header Auth está setado
     if(!authHeader){
         const error = new Error('Usuário não autenticado!');
