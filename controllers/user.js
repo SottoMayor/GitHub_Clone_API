@@ -125,7 +125,7 @@ exports.postSignin = (req, res, next) => {
                 userId: userId,
                 dateRequest: date,
                 token: token,
-                dateRequest: Date.now() + (1000*60)
+                dateRequest: Date.now() + (1000*60*60*2) // token de autenticação tem validade de 2h
             }).then((token) => {
                 // Criptografar token!
                 return bcrypt.hash(token.dataValues.token, 12);

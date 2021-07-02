@@ -28,7 +28,7 @@ router.get('/seguidores/:username', userController.getFollowers);
 router.get('/seguindo/:username', userController.getFollowing);  
 
     // -> Buscar informações gerais do usuário, repositórios e seguidores
-router.get('/:username', isAuth, userController.getIndex);
+router.get('/:username', userController.getIndex);
 
 // Rotas para interação com repositório
     // -> Criar repositório para um usuário

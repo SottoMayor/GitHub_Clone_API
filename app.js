@@ -12,13 +12,12 @@ app.use((req, res, next) => {
     next();
 })
 
-// Verificando se o usuário ainda tá logado
+// Verificando validade do token de acesso
 const Tokens = require('./models/tokens');
 app.use( (req, res, next) => {
     const authHeader = req.get('Authorization');
     if(!authHeader){
         // Nenhum usuário autenticado
-        console.log('Nenhum usuário autenticado');
         return next();
     }
     // Extraindo token
@@ -29,15 +28,17 @@ app.use( (req, res, next) => {
     Tokens.findOne({ where: {userId: userId} })
     .then( tokenData => {
         if(!tokenData){
-            const error = new Error('chave de acesso inválida, usuário não autenticado!');
+            const error = new Error('Chave de acesso inválida, usuário não autenticado!');
             error.statusCode = 401;
-            next(error);
+            throw error;
         }
         const tokenExpiration = tokenData.dateRequest;
         if(Date.now() > tokenExpiration){
             // token já expirou!
-            console.log('Nenhum usuário autenticado[token destruido]');
             tokenData.destroy();
+            const error = new Error('A chave de acesso expirou, faça o login novamente!');
+            error.statusCode = 403;
+            throw error;
         }
         next();
     })
