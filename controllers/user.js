@@ -427,63 +427,48 @@ exports.postFollow = (req, res, next) => {
 // Deixar de seguir outro usuário
 exports.deleteFollow = (req, res, next) => {
     // Extraindo username e usernameFollowing da URL
-    const username = req.params.username;
+    const userId = req.userId;
     const usernameFollowing = req.params.usernameFollowing;
 
-    // Buscando usuário pelo username
-    User.findOne({ where: { username: username } })
-        .then((user) => {
+     User.findOne({
+            where: { username: usernameFollowing }
+        }).then((user) => {
             if (!user) {
                 const error = new Error(
-                    'Usuário não encontrado! Tente novamente.'
+                    'O usuário que você quer seguir não foi encontrado! Tente novamente.'
                 );
                 error.statusCode = 404;
                 throw error;
             }
-            // Guardando ID do usuário que irá seguir
-            followerId = user.dataValues.id;
+            // Guardando ID do usuário que será seguido
+            followingId = user.dataValues.id;
 
-            // Buscando usuário que será seguido
-            return User.findOne({
-                where: { username: usernameFollowing },
-            }).then((user) => {
-                if (!user) {
+            // Buscando a relação entre seguidor e seguido
+            return FollowerFollowing.findOne({
+                where: {
+                    [Op.and]: [
+                        { followerId: userId },
+                        { followingId: followingId },
+                    ],
+                },
+            })
+            .then((followData) => {
+                if (!followData) {
                     const error = new Error(
-                        'O usuário que você quer seguir não foi encontrado! Tente novamente.'
+                        `Você não segue ${usernameFollowing}`
                     );
-                    error.statusCode = 404;
+                    error.statusCode = 422;
                     throw error;
                 }
-                // Guardando ID do usuário que será seguido
-                followingId = user.dataValues.id;
-
-                // Buscando a relação entre seguidor e seguido
-                return FollowerFollowing.findOne({
-                    where: {
-                        [Op.and]: [
-                            { followerId: followerId },
-                            { followingId: followingId },
-                        ],
-                    },
+                // Deletando relação entre seguidor e seguido
+                return followData.destroy();
                 })
-                    .then((followData) => {
-                        if (!followData) {
-                            const error = new Error(
-                                `Você não segue ${usernameFollowing}`
-                            );
-                            error.statusCode = 422;
-                            throw error;
-                        }
-                        // Deletando relação entre seguidor e seguido
-                        return followData.destroy();
-                    })
-                    .then((deletedFollowData) => {
-                        // Mandando resposta para o FrontEnd
-                        res.status(200).json({
-                            message: `${username} parou de seguir ${usernameFollowing}`,
-                            deletedFollowData: deletedFollowData,
-                        });
-                    });
+            .then((deletedFollowData) => {
+                // Mandando resposta para o FrontEnd
+                res.status(200).json({
+                    message: `${username} parou de seguir ${usernameFollowing}`,
+                    deletedFollowData: deletedFollowData,
+                });
             });
         })
         .catch((err) => {

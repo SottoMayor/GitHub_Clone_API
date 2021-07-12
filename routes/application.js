@@ -19,7 +19,7 @@ const isAuth = require('../middleware/is-auth');
 router.post('/:username/:usernameFollowing/seguir', isAuth, userController.postFollow);
 
     // -> Deixar de seguir usuário
-router.delete('/:username/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow);
+router.delete('/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow);
 
     // -> Buscar seguidores do usuário
 router.get('/seguidores/:username', userController.getFollowers);
