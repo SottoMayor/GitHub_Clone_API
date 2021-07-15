@@ -273,6 +273,8 @@ exports.getIndex = (req, res, next) => {
             }
             next(err);
         });
+    
+    // Buscando dados gerais sobre o usuários
     }else{
 
         let userData;
@@ -280,25 +282,8 @@ exports.getIndex = (req, res, next) => {
         let followingCount;
         let repositoriesCount;
 
-        // Buscando usuário pelo username
-        User.findOne({ where: { username: username } })
-            .then((user) => {
-                if (!user) {
-                    const error = new Error(
-                        'Usuário não encontrado! Tente novamente'
-                    );
-                    error.statusCode = 404;
-                    throw error;
-                }
 
-                // Guardando dados do usuário encontrado
-                userData = user;
-
-                // Buscando seguidores do usuário
-                return FollowerFollowing.findAll({
-                    where: { followingUsername: username },
-                });
-            })
+        FollowerFollowing.findAll({ where: { followingUsername: username } })
             .then((followData) => {
 
                 // Guardando número de seguidores
@@ -322,8 +307,8 @@ exports.getIndex = (req, res, next) => {
 
                 // Mandando resposta para o FrontEnd
                 res.status(200).json({
-                    message: `Dados do usuário recuperados com sucesso! ${userData.username} tem ${followersCount} seguidores e segue ${followingCount} usuários`,
-                    userData: userData,
+                    message: `Dados do usuário recuperados com sucesso! ${username} tem ${followersCount} seguidores e segue ${followingCount} usuário(s)`,
+                    username: username,
                     followingCount: followingCount,
                     followersCount: followersCount,
                     repositoriesCount: repositoriesCount
