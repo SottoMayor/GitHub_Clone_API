@@ -181,7 +181,6 @@ exports.getIndex = (req, res, next) => {
     const username = req.params.username;
 
     let userData;
-    let userId;
     let followersCount;
     let followingCount;
     let repositoriesCount;
@@ -199,52 +198,29 @@ exports.getIndex = (req, res, next) => {
 
             // Guardando dados do usuário encontrado
             userData = user;
-            // Guardando ID do usuário encontrado
-            userId = user.dataValues.id;
 
             // Buscando seguidores do usuário
             return FollowerFollowing.findAll({
-                where: { followingId: userId },
+                where: { followingUsername: username },
             });
         })
         .then((followData) => {
-            if (!followData) {
-                const error = new Error(
-                    'O usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
 
             // Guardando número de seguidores
             followersCount = followData.length;
 
             // Buscando usuários que o usuário segue
-            return FollowerFollowing.findAll({ where: { followerId: userId } });
+            return FollowerFollowing.findAll({ where: { followerUsername: username } });
         })
         .then((followData) => {
-            if (!followData) {
-                const error = new Error(
-                    'O usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
 
             // Guardando número de seguidos
             followingCount = followData.length;
 
             // Buscando repositórios do usuário
-            return Repository.findAll({ where: { userId: userId } })
+            return Repository.findAll({ where: { userUsername: username } })
         })
         .then(repositories => {
-            if (!repositories) {
-                const error = new Error(
-                    'Repositórios não encontrados! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
 
             // Guardando número de repositórios
             repositoriesCount = repositories.length;
