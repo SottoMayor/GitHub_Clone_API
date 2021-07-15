@@ -16,22 +16,22 @@ const isAuth = require('../middleware/is-auth');
 
 // Rotas para interação com usuário
     // -> Seguir usuário
-router.post('/:username/:usernameFollowing/seguir', isAuth, userController.postFollow);
+router.post('/:username/:usernameFollowing/seguir', isAuth, userController.postFollow); // **Tirar username**
 
     // -> Deixar de seguir usuário
-router.delete('/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow);
+router.delete('/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow); // **Tirar username**
 
     // -> Buscar seguidores do usuário
-router.get('/seguidores/:username', userController.getFollowers);
+router.get('/seguidores/:username', userController.getFollowers); // **Trocar para /:username?tab=followers**
 
     // -> Seguir quem o usuário segue
-router.get('/seguindo/:username', userController.getFollowing);  
+router.get('/seguindo/:username', userController.getFollowing);  // **Trocar para /:username?tab=following**
 
     // -> Buscar informações gerais do usuário, repositórios e seguidores
 router.get('/:username', userController.getIndex);
 
 // Rotas para interação com repositório
-    // -> Criar repositório para um usuário
+    // -> Criar repositório para um usuário    // **Tirar username**
 router.put(
     '/novo-repositorio/:username', isAuth,
     [
@@ -51,7 +51,7 @@ router.put(
 );
 
     // -> Buscar repositórios de um usuário
-router.get('/repositorios/:username', repositoryController.getRepositories);
+router.get('/repositorios/:username', repositoryController.getRepositories); // **Trocar para /:username?tab=repositories**
 
     // -> Dar estrela a um repositório
 router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController.postStar);
@@ -60,6 +60,6 @@ router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController
 router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar);
 
     // -> Mostrar repositório que o usuário deu estrela
-router.get('/repositorios-com-estrela/:username', repositoryController.getRepositoriesStars);
+router.get('/repositorios-com-estrela/:username', repositoryController.getRepositoriesStars); // **Trocar para /:username??tab=stars**
 
 module.exports = router;
