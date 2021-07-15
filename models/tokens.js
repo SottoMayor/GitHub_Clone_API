@@ -11,8 +11,8 @@ const Tokens = sequelize.define('token',{
         unique: true,
         autoIncrement: true
     },
-    userId:{
-        type: Sequelize.INTEGER,
+    userUsername:{
+        type: Sequelize.STRING,
         allowNull: false
     },
     dateRequest:{

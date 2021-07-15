@@ -23,9 +23,9 @@ app.use( (req, res, next) => {
     // Extraindo token
     const token = authHeader.split(' ')[1];
     // Extraindo userId do token
-    const userId = token.split('*')[0];
+    const userUsername = token.split('*')[0];
 
-    Tokens.findOne({ where: {userId: userId} })
+    Tokens.findOne({ where: {userUsername: userUsername} })
     .then( tokenData => {
         if(!tokenData){
             const error = new Error('Chave de acesso inválida, usuário não autenticado!');
@@ -85,8 +85,8 @@ Repository.belongsTo(User);
 User.belongsToMany(Repository, {through: RepositoryStars});
 Repository.belongsToMany(User, {through: RepositoryStars});
 // Associação N para N -> onDelete e onUpdate são CASCADE por padrão.
-User.belongsToMany(User, {through: FollowerFollowing, as: 'following', foreignKey: 'followingId'});
-User.belongsToMany(User, {through: FollowerFollowing, as: 'follower', foreignKey: 'followerId'});
+User.belongsToMany(User, {through: FollowerFollowing, as: 'following', foreignKey: 'followingUsername'});
+User.belongsToMany(User, {through: FollowerFollowing, as: 'follower', foreignKey: 'followerUsername'});
 
 
 // Aplicação roda em localhost:3000

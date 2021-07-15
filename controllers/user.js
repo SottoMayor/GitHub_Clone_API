@@ -104,7 +104,7 @@ exports.postSignin = (req, res, next) => {
 
             userData = user;
 
-            return Tokens.findOne({ where: { userId: userData.dataValues.id } })
+            return Tokens.findOne({ where: { userUsername: userData.username } })
         })
         .then(tokenExists => {
 
@@ -117,12 +117,12 @@ exports.postSignin = (req, res, next) => {
 
             // Guardando dados para criar o token
             const date = new Date(Date.now()).toISOString();
-            const userId = userData.dataValues.id;
-            const token = userId.toString() + '_' + date;
+            const userUsername = userData.username;
+            const token = userUsername + '_' + date;
 
             // Criando token
             return Tokens.create({
-                userId: userId,
+                userUsername: userUsername,
                 dateRequest: date,
                 token: token,
                 dateRequest: Date.now() + (1000*60*60*2) // token de autenticação tem validade de 2h
@@ -135,7 +135,7 @@ exports.postSignin = (req, res, next) => {
                 res.status(200).json({
                     message: 'Usuário encontrado com sucesso!',
                     userData: userData.dataValues,
-                    token: userData.dataValues.id + '*' +criptToken
+                    token: userData.username + '*' + criptToken
                 });
             })
         })
@@ -151,10 +151,10 @@ exports.postSignin = (req, res, next) => {
 // Logout do usuário
 exports.deleteSignout = (req, res, next) => {
     // Extraindo o ID do usuário da solicitação de entrada
-    const userId = req.userId
+    const userUsername = req.userUsername
 
     // Buscando token de acesso pelo ID do usuário
-    Tokens.findOne({ where: {userId: userId} })
+    Tokens.findOne({ where: {userUsername: userUsername} })
     .then(token => {
         return token.destroy()
     })

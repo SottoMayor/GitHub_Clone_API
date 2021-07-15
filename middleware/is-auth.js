@@ -20,10 +20,10 @@ module.exports = (req, res, next) => {
     const token = authHeader.split(' ')[1];
 
     //Extraindo id do usuário
-    const userId = token.split('*')[0];
+    const userUsername = token.split('*')[0];
     
     // Buscando token do banco de dados
-    Tokens.findOne({ where: { userId: userId } })
+    Tokens.findOne({ where: { userUsername: userUsername } })
     .then(tokenData => {
         if(!tokenData){
             const error = new Error('Usuário não autenticado!');
@@ -50,7 +50,7 @@ module.exports = (req, res, next) => {
         }
 
         // Salvando UserId na request
-        req.userId = userId;
+        req.userUsername = userUsername;
 
         // Se não der erro, deu tudo certo e o usuário foi autenticado!
         next();

@@ -4,12 +4,12 @@ const Sequelize = require('sequelize');
 const sequelize = require('../database/database');
 
 const User = sequelize.define('user', {
-    id:{
-        type: Sequelize.INTEGER,
-        primaryKey: true,
+    username:{
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
-        autoIncrement: true
+        primaryKey: true,
+        allowNull: false,
     },
     name:{
         type: Sequelize.STRING,
@@ -23,11 +23,6 @@ const User = sequelize.define('user', {
     location:{
         type: Sequelize.STRING,
         allowNull: false
-    },
-    username:{
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
     },
     avatar: Sequelize.STRING,
     bio:{
