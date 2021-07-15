@@ -179,31 +179,48 @@ exports.deleteSignout = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
     // Espero receber do FrontEnd (URL) o username
     const username = req.params.username;
-    //[OBS: FAZER VERIFICAÇÃO PRA VER SE USUÁRIO EXISTE!!]
+    // Verificando se usuário extraido está cadastrado no DB
+    User.findOne({ where: { username: username } })
+    .then((user) => {
+        if (!user) {
+            const error = new Error(
+                'O usuário não encontrado! Tente novamente.'
+            );
+            error.statusCode = 404;
+            throw error;
+        }
+    })
+    .catch((err) => {
+        // Capturando possíveis erros
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
 
     // Extraindo query params
     const tab = req.query.tab;
 
-    // Mandando dados para apenas sobre seguidores
+    // Mandando dados apenas sobre seguidores
     if(tab === 'seguidores'){
 
         FollowerFollowing.findAll({ where: { followingUsername: username } })
         .then((followData) => {
             if (followData <= 0) {
                 const error = new Error(
-                    'O usuário não possui seguidores'
+                    'O usuário não possui seguidores.'
                 );
                 error.statusCode = 200;
                 throw error;
             }
 
-            // Guardando IDs dos seguidores
-            const followersIds = followData.map((obj) => {
-                return obj.followerId;
+            // Guardando usernames dos seguidores
+            const followersUsernames = followData.map((obj) => {
+                return obj.followerUsername;
             });
 
-            // Buscando seguidores pelos IDs
-            return User.findAll({ where: { id: followersIds } })
+            // Buscando seguidores pelos usernames
+            return User.findAll({ where: { username: followersUsernames } })
             .then((followersData) => {
                 
                 // Mandando resposta para o FrontEnd
@@ -220,8 +237,42 @@ exports.getIndex = (req, res, next) => {
             }
             next(err);
         });
+
+    // Mandando dados apenas sobre usuários que está seguindo
     }else if(tab === 'seguindo'){
 
+        FollowerFollowing.findAll({ where: { followerUsername: username } })
+        .then((followData) => {
+            if (followData.length <= 0) {
+                const error = new Error(
+                    'O usuário não segue ninguém.'
+                );
+                error.statusCode = 200;
+                throw error;
+            }
+
+            // Guardando usernames de usuários seguidos
+            const followingUsernames = followData.map((obj) => {
+                return obj.followingUsername;
+            });
+
+            // Buscando usuários seguidos pelos usernames
+            return User.findAll({ where: { username: followingUsernames } })
+            .then((followingData) => {
+                // Mandando resposta para o FrontEnd
+                res.status(200).json({
+                    message: `Você segue ${followingData.length} usuário(s)`,
+                    followingData: followingData,
+                });
+            })
+        })
+        .catch((err) => {
+            // Capturando possíveis erros
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
     }else{
 
         let userData;
@@ -474,136 +525,6 @@ exports.deleteFollow = (req, res, next) => {
                     message: `${username} parou de seguir ${usernameFollowing}`,
                     deletedFollowData: deletedFollowData,
                 });
-            });
-        })
-        .catch((err) => {
-            // Capturando possíveis erros
-            if (!err.statusCode) {
-                err.statusCode = 500;
-            }
-            next(err);
-        });
-};
-
-// Mostrar seguidores
-// exports.getFollowers = (req, res, next) => {
-//     // Extraindo username e usernameFollowing da URL
-//     const username = req.params.username;
-
-//     let userId;
-
-//     // Buscando usuário pelo username
-//     User.findOne({ where: { username: username } })
-//         .then((user) => {
-//             if (!user) {
-//                 const error = new Error(
-//                     'O usuário que você quer seguir não foi encontrado! Tente novamente.'
-//                 );
-//                 error.statusCode = 404;
-//                 throw error;
-//             }
-//             // Guardando ID do usuário
-//             userId = user.dataValues.id;
-
-//             // Buscando seguidores do usuário de ID userId
-//             return FollowerFollowing.findAll({
-//                 where: { followingId: userId },
-//             });
-//         })
-//         .then((followData) => {
-//             if (!followData) {
-//                 const error = new Error(
-//                     'O usuário não encontrado! Tente novamente.'
-//                 );
-//                 error.statusCode = 404;
-//                 throw error;
-//             }
-
-//             // Guardando IDs dos seguidores
-//             const followersIds = followData.map((obj) => {
-//                 return obj.dataValues.followerId;
-//             });
-
-//             // Buscando seguidores pelos IDs
-//             return User.findAll({ where: { id: followersIds } });
-//         })
-//         .then((followersData) => {
-//             if (!followersData) {
-//                 const error = new Error(
-//                     'O seguidores não encontrados! Tente novamente.'
-//                 );
-//                 error.statusCode = 404;
-//                 throw error;
-//             }
-
-//             // Mandando resposta para o FrontEnd
-//             res.status(200).json({
-//                 message: `Você tem ${followersData.length} seguidor(es)`,
-//                 followersData: followersData,
-//             });
-//         })
-//         .catch((err) => {
-//             // Capturando possíveis erros
-//             if (!err.statusCode) {
-//                 err.statusCode = 500;
-//             }
-//             next(err);
-//         });
-// };
-
-// Mostrar usuários seguidos
-exports.getFollowing = (req, res, next) => {
-    // Extraindo username e usernameFollowing da URL
-    const username = req.params.username;
-
-    let userId;
-
-    // Buscando usuário pelo username
-    User.findOne({ where: { username: username } })
-        .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'O usuário que você quer seguir não foi encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-            // Guardando o ID do usuário
-            userId = user.dataValues.id;
-
-             // Buscando que o usuário (de ID userId) segue
-            return FollowerFollowing.findAll({ where: { followerId: userId } });
-        })
-        .then((followData) => {
-            if (!followData) {
-                const error = new Error(
-                    'O usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Guardando IDs de usuários seguidos
-            const followingIds = followData.map((obj) => {
-                return obj.dataValues.followingId;
-            });
-
-            // Buscando usuários seguidos pelos IDs
-            return User.findAll({ where: { id: followingIds } });
-        })
-        .then((followingData) => {
-            if (!followingData) {
-                const error = new Error(
-                    'O seguidores não encontrados! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Mandando resposta para o FrontEnd
-            res.status(200).json({
-                message: `Você segue ${followingData.length} usuário(s)`,
-                followingData: followingData,
             });
         })
         .catch((err) => {

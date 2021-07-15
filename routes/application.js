@@ -21,14 +21,8 @@ router.post('/usuarios/:seguir', isAuth, userController.postFollow); // Acessar 
     // -> Deixar de seguir usuário
 router.delete('/usuarios/:deixar-de-seguir', isAuth, userController.deleteFollow); // Acessar via -> deixar-de-seguir?target={username}
 
-//     // -> Buscar seguidores do usuário
-// router.get('/:username?tab=seguidores', userController.getFollowers); // **Trocar para /:username?tab=followers**
-
-    // -> Seguir quem o usuário segue
-router.get('/seguindo/:username', userController.getFollowing);  // **Trocar para /:username?tab=following**
-
     // -> Buscar informações gerais do usuário, repositórios e seguidores
-router.get('/:username', userController.getIndex);
+router.get('/:username', userController.getIndex); // Acessar via -> /:username | /:username?tab=seguindo | /:username?tab=seguidores
 
 // Rotas para interação com repositório
     // -> Criar repositório para um usuário    // **Tirar username**
