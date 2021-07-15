@@ -203,7 +203,6 @@ exports.getIndex = (req, res, next) => {
 
     // Mandando dados apenas sobre seguidores
     if(tab === 'seguidores'){
-
         FollowerFollowing.findAll({ where: { followingUsername: username } })
         .then((followData) => {
             if (followData <= 0) {
@@ -237,7 +236,6 @@ exports.getIndex = (req, res, next) => {
             }
             next(err);
         });
-
     // Mandando dados apenas sobre usuários que está seguindo
     }else if(tab === 'seguindo'){
 
@@ -276,8 +274,7 @@ exports.getIndex = (req, res, next) => {
     
     // Buscando dados gerais sobre o usuários
     }else{
-
-        let userData;
+        
         let followersCount;
         let followingCount;
         let repositoriesCount;
