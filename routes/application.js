@@ -16,10 +16,10 @@ const isAuth = require('../middleware/is-auth');
 
 // Rotas para interação com usuário
     // -> Seguir usuário
-router.post('/:username/:usernameFollowing/seguir', isAuth, userController.postFollow); // **Tirar username**
+router.post('/usuarios/:seguir', isAuth, userController.postFollow); // Acessar via -> seguir?target={username}
 
     // -> Deixar de seguir usuário
-router.delete('/:usernameFollowing/deixar-de-seguir', isAuth, userController.deleteFollow); // **Tirar username**
+router.delete('/usuarios/:deixar-de-seguir', isAuth, userController.deleteFollow); // Acessar via -> deixar-de-seguir?target={username}
 
     // -> Buscar seguidores do usuário
 router.get('/seguidores/:username', userController.getFollowers); // **Trocar para /:username?tab=followers**
