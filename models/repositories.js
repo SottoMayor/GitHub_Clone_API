@@ -4,12 +4,11 @@ const Sequelize = require('sequelize');
 const sequelize = require('../database/database');
 
 const Repository = sequelize.define('repository', {
-    id:{
-        type: Sequelize.INTEGER,
-        primaryKey: true,
+    slug:{
+        type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
-        autoIncrement: true
+        primaryKey: true,
+        unique: true
     },
     name:{
         type: Sequelize.STRING,
@@ -21,10 +20,6 @@ const Repository = sequelize.define('repository', {
     }, 
     public: {
         type: Sequelize.BOOLEAN,
-        allowNull: false
-    },
-    slug:{
-        type: Sequelize.STRING,
         allowNull: false
     },
     stars:{

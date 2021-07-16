@@ -48,10 +48,10 @@ router.put(
 router.get('/repositorios/:username', repositoryController.getRepositories); // **Trocar para /:username?tab=repositories**
 
     // -> Dar estrela a um repositório
-router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController.postStar);
+router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController.postStar); // **Tirar /:username**
 
     // -> Retirar estrela de um repositório
-router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar);
+router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar); // **Tirar /:username**
 
     // -> Mostrar repositório que o usuário deu estrela
 router.get('/repositorios-com-estrela/:username', repositoryController.getRepositoriesStars); // **Trocar para /:username??tab=stars**
