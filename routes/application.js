@@ -25,9 +25,9 @@ router.delete('/usuarios/:deixar-de-seguir', isAuth, userController.deleteFollow
 router.get('/:username', userController.getIndex); // Acessar via -> /:username | /:username?tab=seguindo | /:username?tab=seguidores
 
 // Rotas para interação com repositório
-    // -> Criar repositório para um usuário    // **Tirar username**
+    // -> Criar repositório para um usuário
 router.put(
-    '/novo-repositorio/:username', isAuth,
+    '/novo-repositorio', isAuth,
     [
         body(
             'name',
@@ -45,7 +45,8 @@ router.put(
 );
 
     // -> Buscar repositórios de um usuário
-router.get('/:username', repositoryController.getRepositories); // Acessar via -> /:username?tab=repositorios 
+router.get('/:username', repositoryController.getRepositories); // Acessar via -> /:username?tab=repositorios : /:username?tab=estrelas
+
 //     // -> Buscar apenas um repositório de um usuário
 // router.get('/:username/:slug', repositoryController.getRepository) 
 
@@ -54,6 +55,5 @@ router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController
 
     // -> Retirar estrela de um repositório
 router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar); // **Tirar /:username**
-
 
 module.exports = router;

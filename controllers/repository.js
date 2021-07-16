@@ -14,14 +14,13 @@ const { Op } = require('sequelize');
 
 // Criando Repositório
 exports.putRepository = (req, res, next) => {
-    // Extraindo o username da URL
-    const username = req.params.username;
+    const username = req.userUsername;
 
     // Espero receber dados do FrontEnd
     const nameRepo = req.body.name;
     const descRepo = req.body.description;
     const publicRepo = req.body.public;
-    const slug = username + '_' + nameRepo;
+    const slug = username + '_' + nameRepo.replace(" ", "");
 
     // Validação de dados <-> Rotas Application
     const errors = validationResult(req);
@@ -35,14 +34,6 @@ exports.putRepository = (req, res, next) => {
     // Buscando usuário por meio do username
     User.findOne({ where: { username: username } })
         .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'Usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
             // Criando repositório
             return user
                 .createRepository({
