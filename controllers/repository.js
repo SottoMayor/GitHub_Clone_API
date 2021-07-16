@@ -266,70 +266,54 @@ exports.deleteRepository = (req, res, next) => {
 
 // Dando estrela para um repositório
 exports.postStar = (req, res, next) => {
-    // Extraindo o username e id do repositório da URL
-    const username = req.params.username;
-    const repositoryId = req.params.repositoryId;
+    // Extraindo slug do repositório da URL
+    const repoSlug = req.params.repoSlug;
+    
+    const username = req.userUsername;
 
-    let userId;
 
-    // Buscando usuário por meio do username
-    User.findOne({ where: { username: username } })
-        .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'Usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-            // Guardando informações sobre o ID do usuário
-            userId = user.dataValues.id;
+    Repository.findByPk(repoSlug)
+    .then( repository => {
+        if (!repository) {
+            const error = new Error(
+                'Repositório não encontrado! Tente novamente.'
+            );
+            error.statusCode = 404;
+            throw error;
+        }
 
-            // Buscando repositório pela chave primária
-            return Repository.findByPk(repositoryId)
-            .then( repository => {
-                if (!repository) {
-                    const error = new Error(
-                        'Repositório não encontrado! Tente novamente.'
-                    );
-                    error.statusCode = 404;
-                    throw error;
-                }
+        if(!repository.public){
+            const error = new Error(
+                'Esse repositório é privado! Portanto, não é permitido dar estrelas a ele.'
+            );
+            error.statusCode = 422;
+            throw error;
+        }
 
-                if(!repository.public){
-                    const error = new Error(
-                        'Esse repositório é privado! Portanto, não é permitido dar estrelas a ele.'
-                    );
-                    error.statusCode = 422;
-                    throw error;
-                }
-
-                // Adicionando estrela no repositório
-                repository.stars += 1;
-                return repository.save()
-            })
-            .then( result => {
-                // Dando estrela ao repositório selecionado
-                return RepositoryStars.create({
-                    userId: userId,
-                    repositoryId: repositoryId,
-                }).then((createdRepoStar) => {
-                    // Mandando resposta para o FrontEnd
-                    res.status(201).json({
-                        message: 'Você adicionou uma estrela à esse repositório!',
-                        repositoryStar: createdRepoStar,
-                    });
+        // Adicionando estrela no repositório
+        repository.stars += 1;
+        return repository.save()
+        .then( result => {
+            // Dando estrela ao repositório selecionado
+            return RepositoryStars.create({
+                userUsername: username,
+                repositorySlug: repoSlug,
+            }).then((createdRepoStar) => {
+                // Mandando resposta para o FrontEnd
+                res.status(201).json({
+                    message: 'Você adicionou uma estrela à esse repositório!',
+                    repositoryStar: createdRepoStar,
                 });
-
-            })
-        })
-        .catch((err) => {
-            // Capturando possíveis erros
-            if (!err.statusCode) {
-                err.statusCode = 500;
-            }
-            next(err);
+            });
         });
+    })
+    .catch((err) => {
+        // Capturando possíveis erros
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
 };
 
 // Retirando estrela de um repositório

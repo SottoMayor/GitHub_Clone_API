@@ -51,7 +51,7 @@ router.get('/:username', repositoryController.getRepositories); // Acessar via -
 // router.get('/:username/:slug', repositoryController.getRepository) 
 
     // -> Dar estrela a um repositório
-router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController.postStar); // **Tirar /:username**
+router.post('/repositorios/:repoSlug/dar-estrela', isAuth, repositoryController.postStar); // **Tirar /:username**
 
     // -> Retirar estrela de um repositório
 router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar); // **Tirar /:username**
