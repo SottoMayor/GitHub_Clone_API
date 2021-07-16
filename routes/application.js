@@ -45,7 +45,7 @@ router.put(
 );
 
     // -> Buscar repositórios de um usuário
-router.get('/:username', repositoryController.getRepositories); // **Trocar para /:username?tab=repositories**
+router.get('/:username', repositoryController.getRepositories); // Acessar via -> /:username?tab=repositorios 
 //     // -> Buscar apenas um repositório de um usuário
 // router.get('/:username/:slug', repositoryController.getRepository) 
 
@@ -55,7 +55,5 @@ router.post('/:username/:repositoryId/dar-estrela', isAuth, repositoryController
     // -> Retirar estrela de um repositório
 router.delete('/:username/:repositoryId/retirar-estrela', isAuth, repositoryController.deleteStar); // **Tirar /:username**
 
-    // -> Mostrar repositório que o usuário deu estrela
-router.get('/repositorios-com-estrela/:username', repositoryController.getRepositoriesStars); // **Trocar para /:username??tab=stars**
 
 module.exports = router;

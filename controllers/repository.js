@@ -110,6 +110,42 @@ exports.getRepositories = (req, res, next) => {
             }
             next(err);
         });
+    }else if(tab === 'estrelas'){
+        RepositoryStars.findAll({where: {userUsername: username}})
+        .then(repositoriesStars => {
+            if(repositoriesStars <= 0){
+                const error = new Error(
+                    `Você não possui repositórios marcados com estrela.`
+                );
+                error.statusCode = 200;
+                throw error;
+            }
+
+            // Guardando os slugs dos repositórios com estrela de um usuário
+            const repositoriesArrayslugs = repositoriesStars.map((obj) => {
+                return obj.repositorySlug;
+            });
+
+            // Buscando repositórios por meio do array de IDs
+            return Repository.findAll({ where: {slug: repositoriesArrayslugs} })
+            .then( reposStars => {
+        
+                // Mandando resposta para o FrontEnd
+                res.status(200).json({
+                    message: `Você deu estrela a ${reposStars.length} repositórios.`,
+                    reposStarsNumber: reposStars.length,
+                    repositoriesData: reposStars,
+                });
+            })
+        })
+        .catch((err) => {
+            // Capturando possíveis erros
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+
     }
 
 };
@@ -373,70 +409,6 @@ exports.deleteStar = (req, res, next) => {
                     repositoryStar: deletedRepoStar,
                 });
             })
-        })
-        .catch((err) => {
-            // Capturando possíveis erros
-            if (!err.statusCode) {
-                err.statusCode = 500;
-            }
-            next(err);
-        });
-};
-
-// Exibindo repositórios que o usuário deu estrela
-exports.getRepositoriesStars = (req, res, next) => {
-    // Extraindo o username e id do repositório da URL
-    const username = req.params.username;
-
-    // Buscando usuário por meio do username
-    User.findOne({ where: { username: username } })
-        .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'Usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Guardando informações sobre o ID do usuário
-            const userId = user.dataValues.id;
-
-            // Buscando todos os repositório com estrela de um usuário, por meio do ID do usuário
-            return RepositoryStars.findAll({where: {userId: userId}})
-        })
-        .then(repositoriesStars => {
-            if(!repositoriesStars){
-                const error = new Error(
-                    'Repositório(s) não encontrado(s)! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Guardando os IDs dos repositórios com estrela de um usuário
-            const repositoriesArrayIds = repositoriesStars.map((obj) => {
-                return obj.dataValues.id;
-            });
-
-            // Buscando repositórios por meio do array de IDs
-            return Repository.findAll({ where: {id: repositoriesArrayIds} })
-            
-        })
-        .then( reposStars => {
-            if(!reposStars){
-                const error = new Error(
-                    'Repositório(s) não encontrado(s)! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Mandando resposta para o FrontEnd
-            res.status(200).json({
-                message: `Você deu estrela a ${reposStars.length} repositório(s).`,
-                repositoriesData: reposStars,
-            });
         })
         .catch((err) => {
             // Capturando possíveis erros
