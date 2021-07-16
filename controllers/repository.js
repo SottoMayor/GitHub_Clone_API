@@ -318,29 +318,14 @@ exports.postStar = (req, res, next) => {
 
 // Retirando estrela de um repositório
 exports.deleteStar = (req, res, next) => {
-    // Extraindo o username e id do repositório da URL
-    const username = req.params.username;
-    const repositoryId = req.params.repositoryId;
+    // Extraindo slug do repositório da URL
+    const repoSlug = req.params.repoSlug;
+    
+    const username = req.userUsername;
 
-    let userId;
-
-    // Buscando usuário por meio do username
-    User.findOne({ where: { username: username } })
-        .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'Usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Guardando informações sobre o ID do usuário
-            userId = user.dataValues.id;
-
-            Repository.findByPk(repositoryId)
+            Repository.findByPk(repoSlug)
             .then( repository => {
-                if (!user) {
+                if (!repository) {
                     const error = new Error(
                         'Repositório não encontrado! Tente novamente.'
                     );
@@ -358,11 +343,8 @@ exports.deleteStar = (req, res, next) => {
             // Buscando um repositório, pelo ID do repositório e pelo ID do usuário
             return RepositoryStars.findOne({
                 where: {
-                    [Op.and]: [
-                        { userId: userId },
-                        { repositoryId: repositoryId },
-                    ],
-                },
+                    [Op.and]: [ { userUsername: username }, { repositorySlug: repoSlug } ]
+                    }
                 })
             })
             .then((repoStar) => {
@@ -384,7 +366,6 @@ exports.deleteStar = (req, res, next) => {
                     repositoryStar: deletedRepoStar,
                 });
             })
-        })
         .catch((err) => {
             // Capturando possíveis erros
             if (!err.statusCode) {
