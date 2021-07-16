@@ -272,6 +272,15 @@ exports.getIndex = (req, res, next) => {
             next(err);
         });
     
+    // Buscando dados sobre repositórios
+    }else if(tab === 'repositorios'){
+        // Esse bloco será resolvido no arquivo repository.js em controllers
+        next();
+
+    } else if(tab === 'estrelas'){
+        // Esse bloco será resolvido no arquivo repository.js em controllers
+        next();
+
     // Buscando dados gerais sobre o usuários
     }else{
         

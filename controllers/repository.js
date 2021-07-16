@@ -70,55 +70,38 @@ exports.putRepository = (req, res, next) => {
 
 // Exibindo repositórios
 exports.getRepositories = (req, res, next) => {
-    // Extraindo o username da URL
+    // Espero receber do FrontEnd (URL) o username
     const username = req.params.username;
-
-    // Buscando usuário por meio do username
+    // Verificando se usuário extraido está cadastrado no DB
     User.findOne({ where: { username: username } })
-        .then((user) => {
-            if (!user) {
-                const error = new Error(
-                    'Usuário não encontrado! Tente novamente.'
-                );
-                error.statusCode = 404;
-                throw error;
-            }
-
-            // Guardando informações sobre o ID do usuário
-            const userId = user.dataValues.id;
-
-            // Buscando todos os repositório, por meio do ID do usuário
-            return Repository.findAll({ where: { userId: userId } }).then(
-                (repositories) => {
-                    if (!repositories) {
-                        const error = new Error(
-                            'Nenhum repositório encontrado!'
-                        );
-                        error.statusCode = 404;
-                        throw error;
-                    }
-
-                    // Armazenando repositórios em um array
-                    const repositoriesArray = repositories.map((obj) => {
-                        return obj.dataValues;
-                    });
-
-                    let message;
-                    if (repositoriesArray.length === 1) {
-                        message = 'Repositório encontrado.';
-                    } else if (repositoriesArray.length > 1) {
-                        message = 'Repositórios encontrados.';
-                    } else {
-                        message = 'Nenhum repositório encontrado.';
-                    }
-                    
-                    // Mandando resposta para o FrontEnd
-                    res.status(200).json({
-                        message: message,
-                        repositoriesData: repositoriesArray,
-                    });
-                }
+    .then((user) => {
+        if (!user) {
+            const error = new Error(
+                'O usuário não encontrado! Tente novamente.'
             );
+            error.statusCode = 404;
+            throw error;
+        }
+    })
+    .catch((err) => {
+        // Capturando possíveis erros
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+
+    // Extraindo query params
+    const tab = req.query.tab;
+
+    if(tab === 'repositorios'){
+        Repository.findAll({ where: { userUsername: username } })
+        .then((repositories) => {
+            // Mandando resposta para o FrontEnd
+            res.status(200).json({
+                message: `${username} possui ${repositories.length} reposiório(s).`,
+                repositoriesData: repositories,
+            });
         })
         .catch((err) => {
             // Capturando possíveis erros
@@ -127,6 +110,8 @@ exports.getRepositories = (req, res, next) => {
             }
             next(err);
         });
+    }
+
 };
 
 // Atualizando repositório
