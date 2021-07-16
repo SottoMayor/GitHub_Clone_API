@@ -141,6 +141,42 @@ exports.getRepositories = (req, res, next) => {
 
 };
 
+
+exports.getRepository = (req, res, next) => {
+    // Extraindo o username e slug do repositório da URL
+    const username = req.params.username;
+    const repoSlug = req.params.repoSlug;
+
+    Repository.findOne({ where: { [Op.and]: [{userUsername: username}, {slug: repoSlug}] } })
+    .then( repository => {
+        if(!repository){
+            const error = new Error(`O repositório de slug ${repoSlug} não foi encontrado!`)
+            error.statusCode = 404;
+            throw error
+        }
+
+        if(!repository.public){
+            const error = new Error(`Não é possível exibir ${repoSlug}, pois esse repositório é privado!`)
+            error.statusCode = 403;
+            throw error
+        }
+        
+        res.status(200).json({
+            message:"Repositório encontrado com sucesso!",
+            repositoryData: repository
+        });
+    })
+    .catch((err) => {
+        // Capturando possíveis erros
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+
+}
+
+
 // Atualizando repositório
 exports.patchRepository = (req, res, next) => {
     // Extraindo o username e id do repositório da URL

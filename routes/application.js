@@ -47,8 +47,8 @@ router.put(
     // -> Buscar repositórios de um usuário
 router.get('/:username', repositoryController.getRepositories); // Acessar via -> /:username?tab=repositorios : /:username?tab=estrelas
 
-//     // -> Buscar apenas um repositório de um usuário
-// router.get('/:username/:slug', repositoryController.getRepository) 
+    // -> Buscar apenas um repositório de um usuário
+router.get('/:username/:repoSlug', repositoryController.getRepository) 
 
     // -> Dar estrela a um repositório
 router.post('/repositorios/:repoSlug/dar-estrela', isAuth, repositoryController.postStar);
